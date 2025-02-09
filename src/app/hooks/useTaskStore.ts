@@ -1,7 +1,8 @@
 // src/app/hooks/useTaskStore.ts
 
-import { useState, useEffect } from "react";
-
+import { PriorityQueue } from "@/utils/PriorityQueue";
+import { useState, useEffect, useCallback } from "react";
+import { useMemo } from "react";
 interface Task {
   id: string;
   title: string;
@@ -19,8 +20,7 @@ export const useTaskStore = () => {
     "ALL"
   ); // Add filter state
 
-  // Function to fetch tasks
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -30,18 +30,33 @@ export const useTaskStore = () => {
       if (!res.ok) {
         throw new Error(`HTTP error! Status: ${res.status}`);
       }
-      const data = await res.json();
+      const data: Task[] = await res.json();
 
-      // Sort tasks by priority and due date
-      const sortedTasks = data.sort((a: Task, b: Task) => {
-        const priorityOrder = { HIGH: 1, MEDIUM: 2, LOW: 3 };
-        if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
-          return priorityOrder[a.priority] - priorityOrder[b.priority];
-        }
-        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      // Use the priority queue to sort tasks
+      const priorityQueue = new PriorityQueue();
+      data.forEach((task) => {
+        priorityQueue.enqueue({
+          id: task.id,
+          title: task.title,
+          priority: { HIGH: 1, MEDIUM: 2, LOW: 3 }[task.priority], // Convert priority to numeric value
+          dueDate: new Date(task.dueDate), // Convert dueDate to Date object
+        });
       });
 
-      setTasks(sortedTasks);
+      // Dequeue tasks to get them in priority order
+      const sortedTasks: Task[] = [];
+      while (priorityQueue.peek()) {
+        const task = priorityQueue.dequeue();
+        if (task) {
+          // Find the original task object to retain all fields
+          const originalTask = data.find((t) => t.id === task.id);
+          if (originalTask) sortedTasks.push(originalTask);
+        }
+      }
+
+      if (JSON.stringify(tasks) !== JSON.stringify(sortedTasks)) {
+        setTasks(sortedTasks);
+      }
       setError(null);
     } catch (err) {
       console.error("Error fetching tasks:", err);
@@ -49,15 +64,16 @@ export const useTaskStore = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Filtered tasks based on the current filter
-  const filteredTasks = tasks.filter((task) => {
-    if (filter === "ALL") return true;
-    if (filter === "COMPLETED") return task.completed;
-    if (filter === "INCOMPLETE") return !task.completed;
-    return true;
-  });
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task) => {
+      if (filter === "ALL") return true;
+      if (filter === "COMPLETED") return task.completed;
+      if (filter === "INCOMPLETE") return !task.completed;
+      return true;
+    });
+  }, [tasks, filter]);
 
   // Trigger fetch on component mount
   useEffect(() => {
