@@ -1,13 +1,12 @@
 // src/app/layout.tsx
-
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./components/Sidebar";
 import { SidebarProvider } from "../context/SidebarContext";
-import SessionWrapper from "./components/SessionWrapper";
 import Navbar from "./components/Navbar";
+import MainContentWrapper from "./components/MainContentWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,20 +35,15 @@ export default function RootLayout({
         <Toaster position="top-right" reverseOrder={false} />
         {/* Wrap the app with SidebarProvider */}
         <SidebarProvider>
-          {/* Wrap the app with SessionWrapper (Client Component) */}
-          <SessionWrapper>
-            {/* Navbar */}
-            <Navbar />
-            {/* Main Layout */}
-            <div className="flex min-h-screen">
-              {/* Sidebar */}
-              <Sidebar />
-              {/* Main Content */}
-              <main className="flex-1 p-4 transition-all duration-300">
-                {children}
-              </main>
-            </div>
-          </SessionWrapper>
+          {/* Navbar */}
+          <Navbar />
+          {/* Main Layout */}
+          <div className="flex min-h-screen">
+            {/* Sidebar */}
+            <Sidebar />
+            {/* Main Content */}
+            <MainContentWrapper>{children}</MainContentWrapper>
+          </div>
         </SidebarProvider>
       </body>
     </html>

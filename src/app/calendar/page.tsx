@@ -34,7 +34,7 @@ const CalendarPage = () => {
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className="p-4 max-w-4xl mx-auto border rounded-md shadow-lg bg-white">
       <h1 className="text-2xl font-bold mb-4">Task Calendar</h1>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}

@@ -49,7 +49,7 @@ const AnalyticsPage = () => {
   ).length;
 
   return (
-    <div className="p-4 max-w-6xl mx-auto">
+    <div className="p-4 max-w-6xl mx-auto border rounded-md shadow-lg bg-white">
       <h1 className="text-3xl font-bold mb-6 text-center">
         Analytics Dashboard
       </h1>

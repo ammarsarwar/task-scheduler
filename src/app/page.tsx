@@ -11,7 +11,7 @@ export default function Home() {
     useTaskStore();
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className="p-4 max-w-4xl mx-auto border rounded-md shadow-lg bg-white">
       {/* Task Modal */}
       <div className="flex justify-between mb-4">
         <div className="flex gap-2">
